@@ -95,6 +95,8 @@ model Studio {
   floorType     String // treverk, parkett, gulv til trening
   dressingRooms Boolean @default(true)
   parking       Boolean @default(false)
+
+  courses Course[]
 }
 
 model Instructor {
@@ -106,6 +108,8 @@ model Instructor {
   styles   String // JSON-array av style-slugs
   imageUrl String
   since    Int? // underviser siden år
+
+  courses Course[]
 }
 
 // ---------------- Dansestiler & byer ----------------
@@ -142,7 +146,9 @@ model Course {
   schoolId     String
   school       School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
   studioId     String?
+  studio       Studio?   @relation(fields: [studioId], references: [id])
   instructorId String?
+  instructor   Instructor? @relation(fields: [instructorId], references: [id])
   styleSlug    String
   title        String
   slug         String   @unique

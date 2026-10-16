@@ -31,7 +31,7 @@ export function Wordmark({ className = "" }: { className?: string }) {
 }
 
 export function SiteHeader() {
-  const pathname = usePathname();
+  const pathname = usePathname(); // brukes til aktiv-markering
   const { data: session } = useSession();
   const [open, setOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -42,7 +42,7 @@ export function SiteHeader() {
     return () => { document.body.style.overflow = ""; };
   }, [open]);
 
-  useEffect(() => { setOpen(false); setSearchOpen(false); }, [pathname]);
+  const closeAll = () => { setOpen(false); setSearchOpen(false); };
 
   const isActive = (href: string) => {
     const base = href.split("?")[0];
@@ -154,7 +154,7 @@ export function SiteHeader() {
             <ul className="space-y-1">
               {NAV.map((item) => (
                 <li key={item.label}>
-                  <Link href={item.href} className="block border-b border-white/10 py-4 font-display text-2xl font-bold text-white">
+                  <Link href={item.href} onClick={closeAll} className="block border-b border-white/10 py-4 font-display text-2xl font-bold text-white">
                     {item.label} <ChevronDown className="inline h-5 w-5 -rotate-90 opacity-60" />
                   </Link>
                 </li>

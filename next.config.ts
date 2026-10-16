@@ -7,6 +7,9 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: true,
   },
   reactStrictMode: false,
+  // Prisma-klienten skal lastes direkte fra node_modules (ikke bakes inn i bundlen),
+  // slik at `prisma generate`/`db:push` gjenspeiles uten å måtte tømme cache.
+  serverExternalPackages: ["@prisma/client", ".prisma/client"],
 };
 
 export default nextConfig;

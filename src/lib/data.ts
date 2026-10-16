@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import { seatCountsForCourses, toCardData, computeSeats, ribbonsFor } from "@/lib/seats";
-import { styleName, styleFamily, FAMILIES } from "@/lib/constants";
+import { styleName, styleFamily, FAMILIES, DANCE_STYLES } from "@/lib/constants";
 import type { CourseCardData, SchoolCardData, NightCardData } from "@/lib/types";
 import type { Prisma } from "@prisma/client";
 
@@ -225,7 +225,7 @@ export async function getStyleDetail(slug: string) {
   if (!style) return null;
   const courses = await db.course.findMany({
     where: { styleSlug: slug, status: "AKTIV", school: { status: "APPROVED" } },
-    include: { school: { select: { name: true, slug: true, city: true, district: true } } },
+    include: { school: { select: { name: true, slug: true, city: true, citySlug: true, district: true } } },
     orderBy: { startDate: "asc" },
     take: 60,
   });
