@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Nunito, Figtree } from "next/font/google";
+import { SessionProvider } from "next-auth/react";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { SiteHeader } from "@/components/site/header";
@@ -65,13 +66,15 @@ export default function RootLayout({
   return (
     <html lang="nb-NO" suppressHydrationWarning>
       <body className={`${nunito.variable} ${figtree.variable} antialiased bg-background text-foreground flex min-h-screen flex-col`}>
-        <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-[100] focus:bg-white focus:text-navy focus:px-4 focus:py-2">
-          Hopp til innhold
-        </a>
-        <SiteHeader />
-        <main id="main-content" className="flex-1 flex flex-col">{children}</main>
-        <SiteFooter />
-        <Toaster />
+        <SessionProvider>
+          <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-[100] focus:bg-white focus:text-navy focus:px-4 focus:py-2">
+            Hopp til innhold
+          </a>
+          <SiteHeader />
+          <main id="main-content" className="flex-1 flex flex-col">{children}</main>
+          <SiteFooter />
+          <Toaster />
+        </SessionProvider>
       </body>
     </html>
   );

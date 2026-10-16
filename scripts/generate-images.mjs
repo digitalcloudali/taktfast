@@ -115,9 +115,14 @@ async function generateOne(zai, img, attempt = 1) {
     const msg = String(e?.message || e);
     console.error(`ERR ${img.name} attempt ${attempt}: ${msg}`);
     const is429 = msg.includes('429') || msg.includes('Too many');
-    const maxAttempts = is429 ? 6 : 3;
+    if (is429) {
+      // global pause ved rate-limit
+      console.log(`RATELIMIT pause 30s (global) ...`);
+      await new Promise(r => setTimeout(r, 30000));
+    }
+    const maxAttempts = 8;
     if (attempt < maxAttempts) {
-      await new Promise(r => setTimeout(r, (is429 ? 8000 : 3000) * attempt));
+      await new Promise(r => setTimeout(r, (is429 ? 15000 : 4000) * Math.min(attempt, 4)));
       return generateOne(zai, img, attempt + 1);
     }
     return false;
@@ -129,7 +134,7 @@ async function main() {
   const queue = IMAGES.filter(i => !(fs.existsSync(path.join(OUT, `${i.name}.png`)) && fs.statSync(path.join(OUT, `${i.name}.png`)).size > 10000));
   console.log(`Generating ${queue.length} of ${IMAGES.length} images...`);
   let done = 0, failed = [];
-  const CONC = 2;
+  const CONC = 1;
   const workers = Array.from({ length: CONC }, async () => {
     while (queue.length) {
       const img = queue.shift();
@@ -138,7 +143,7 @@ async function main() {
       done++;
       console.log(`PROGRESS ${done}/${IMAGES.length}`);
       if (!ok) failed.push(img.name);
-      await new Promise(r => setTimeout(r, 1200));
+      await new Promise(r => setTimeout(r, 3000));
     }
   });
   await Promise.all(workers);
