@@ -1,0 +1,420 @@
+// Taktfast — Prisma schema (SQLite, demo/dev)
+// Merk: SQLite støtter ikke Prisma-enums — alle "enums" er String + Zod-validering i lib/constants.ts
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------- Brukere & profiler ----------------
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  phone        String?
+  role         String   @default("DANSER") // DANSER | SKOLE | ADMIN
+  schoolId     String?  // lenke for SKOLE-brukere
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  profiles        DeltakerProfile[]
+  bookings        Booking[]
+  waitlistEntries WaitlistEntry[]
+  favorites       Favorite[]
+  klippekort      Klippekort[]
+}
+
+model DeltakerProfile {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String
+  birthYear Int? // fødselsår — brukes til alderssjekk
+  isChild   Boolean  @default(false)
+  consent   Boolean  @default(false) // foresatt-samtykke for barn
+  notes     String?
+  createdAt DateTime @default(now())
+
+  bookings        Booking[]
+  waitlistEntries WaitlistEntry[]
+}
+
+// ---------------- Danseskoler ----------------
+
+model School {
+  id             String   @id @default(cuid())
+  ownerId        String? // User (SKOLE) som eier skolen
+  name           String
+  slug           String   @unique
+  tagline        String
+  description    String // kort, til kort
+  about          String // lengre "Om skolen"
+  address        String
+  postalCode     String
+  city           String
+  citySlug       String
+  district       String? // bydel
+  lat            Float
+  lng            Float
+  phone          String
+  email          String
+  website        String?
+  coverImage     String
+  gallery        String   @default("[]") // JSON-array av bilde-URLer
+  styles         String   @default("[]") // JSON-array av style-slugs
+  amenities      String   @default("[]") // JSON-array (garderobe, parkering, kafé ...)
+  verified       Boolean  @default(false)
+  status         String   @default("PENDING") // PENDING | APPROVED | REJECTED
+  commissionRate Float    @default(0.1)
+  ratingAvg      Float    @default(0)
+  ratingCount    Int      @default(0)
+  createdAt      DateTime @default(now())
+
+  studios         Studio[]
+  instructors     Instructor[]
+  courses         Course[]
+  nights          DanceNight[]
+  weddingPackages WeddingPackage[]
+  reviews         Review[]
+  privateRequests PrivateRequest[]
+  messages        Message[]
+}
+
+model Studio {
+  id            String  @id @default(cuid())
+  schoolId      String
+  school        School  @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  name          String
+  description   String
+  floorType     String // treverk, parkett, gulv til trening
+  dressingRooms Boolean @default(true)
+  parking       Boolean @default(false)
+}
+
+model Instructor {
+  id       String @id @default(cuid())
+  schoolId String
+  school   School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  name     String
+  bio      String
+  styles   String // JSON-array av style-slugs
+  imageUrl String
+  since    Int? // underviser siden år
+}
+
+// ---------------- Dansestiler & byer ----------------
+
+model DanceStyle {
+  id               String  @id @default(cuid())
+  slug             String  @unique
+  name             String
+  family           String // PARDANS | BRYLLUP | BARNE_UNG | BALLETT_JAZZ | HIPHOP_STREET | TRENING | LINEDANCE | SENIOR
+  tint             String // pastellfarge (hex) for kort/bakgrunn
+  image            String
+  description      String
+  longDescription  String
+  komAlene         Boolean @default(false) // kan komme alene uten partner
+  requiresPartner  Boolean @default(false)
+  sortOrder        Int     @default(0)
+}
+
+model City {
+  id     String @id @default(cuid())
+  slug   String @unique
+  name   String
+  county String
+  lat    Float
+  lng    Float
+  image  String
+  blurb  String
+}
+
+// ---------------- Kurs & timer ----------------
+
+model Course {
+  id           String   @id @default(cuid())
+  schoolId     String
+  school       School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  studioId     String?
+  instructorId String?
+  styleSlug    String
+  title        String
+  slug         String   @unique
+  level        String // NYBEGYNNER | LETT_VIDEREKOMMEN | VIDEREKOMMEN | AVANSERT
+  format       String // KURSREKKE | DROPIN | PRIVATTIME | WORKSHOP | PROVETIME
+  ageGroup     String   @default("VOKSEN") // ALDER_3_6 | ALDER_7_12 | ALDER_13_17 | VOKSEN | SENIOR | ALLE
+  description  String
+  learnWhat    String // hva du lærer
+  clothing     String // påkledning/sko
+  capacity     Int // PAR for pardans, PERSON ellers
+  unit         String   @default("PERSON") // PAR | PERSON
+  price        Int // i NOK
+  dropInPrice  Int? // drop-in-pris per person (hvis skolen tillater drop-in)
+  studentPrice Int?
+  seniorPrice  Int?
+  pricePer     String   @default("PERSON") // PERSON | PAR
+  durationMin  Int      @default(75)
+  weekday      Int // 1 = mandag ... 7 = søndag
+  startTime    String // "19:00"
+  startDate    DateTime
+  sessions     Int // antall ganger i rekka
+  imageUrl     String
+  komAlene     Boolean  @default(false) // «Kom alene – vi finner partner»
+  status       String   @default("AKTIV") // AKTIV | FULL | AVLYST
+  ratingAvg    Float    @default(0)
+  ratingCount  Int      @default(0)
+  bookingCount Int      @default(0)
+  createdAt    DateTime @default(now())
+
+  dates         CourseDate[]
+  bookings      Booking[]
+  waitlist      WaitlistEntry[]
+  reviews       Review[]
+  favoriteUsers Favorite[]
+}
+
+model CourseDate {
+  id        String    @id @default(cuid())
+  courseId  String
+  course    Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  date      DateTime
+  startTime String
+  endTime   String
+  status    String    @default("PLANLAGT") // PLANLAGT | GJENNOMFORT | AVLYST
+  note      String?
+}
+
+// ---------------- Dansekvelder ----------------
+
+model DanceNight {
+  id                String   @id @default(cuid())
+  schoolId          String
+  school            School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  title             String
+  slug              String   @unique
+  date              DateTime
+  startTime         String
+  endTime           String
+  price             Int
+  description       String
+  dresscode         String
+  freeBeginnerClass Boolean  @default(false)
+  styles            String // JSON-array av style-slugs
+  capacity          Int      @default(80)
+  imageUrl          String
+  status            String   @default("AKTIV") // AKTIV | AVLYST | GJENNOMFORT
+
+  bookings Booking[]
+}
+
+// ---------------- Bryllupsdans ----------------
+
+model WeddingPackage {
+  id         String  @id @default(cuid())
+  schoolId   String
+  school     School  @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  name       String
+  slug       String
+  type       String // GRUPPEKURS | PRIVATTIMER | KOREOGRAFI | FAR_DATTER
+  sessions   Int
+  durationMin Int    @default(60)
+  price      Int
+  priceUnit  String  @default("PER_PAR") // PER_PAR | PER_TIME
+  description String
+  features   String // JSON-array
+  image      String
+
+  privateRequests PrivateRequest[]
+  bookings        Booking[]
+}
+
+model PrivateRequest {
+  id          String    @id @default(cuid())
+  schoolId    String
+  school      School    @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  packageId   String?
+  weddingPackage WeddingPackage? @relation(fields: [packageId], references: [id])
+  userId      String?
+  contactName String
+  email       String
+  phone       String?
+  weddingDate DateTime?
+  participants Int      @default(2)
+  preferredTimes String?
+  message     String?
+  status      String    @default("NEW") // NEW | CONTACTED | BOOKED
+  createdAt   DateTime  @default(now())
+}
+
+// ---------------- Bookinger ----------------
+
+model Booking {
+  id             String    @id @default(cuid())
+  code           String // gruppekode — deles av alle seter i én bestilling, brukes til QR
+  userId         String
+  user           User      @relation(fields: [userId], references: [id])
+  profileId      String?
+  profile        DeltakerProfile? @relation(fields: [profileId], references: [id])
+  schoolId       String
+  courseId       String?
+  course         Course?   @relation(fields: [courseId], references: [id])
+  dateId         String? // for drop-in (enkelt dato)
+  nightId        String?
+  night          DanceNight? @relation(fields: [nightId], references: [id])
+  packageId      String?
+  weddingPackage WeddingPackage? @relation(fields: [packageId], references: [id])
+  kind           String // KURS | DROPIN | PRIVATTIME | KVELD | PROVETIME | KLIPPEKORT | MAANEDSKORT | PAKKE
+  role           String    @default("INGEN") // FORER | FOLGER | BEGGE | INGEN
+  seatLabel      String? // "Fører 1" osv. til oppmøteliste
+  amount         Int // betalt i NOK
+  discount       Int       @default(0)
+  klippUsed      Int       @default(0)
+  klippekortId   String?
+  couponCode     String?
+  giftCardCode   String?
+  paymentMethod  String    @default("VIPPS") // VIPPS | KORT
+  paymentStatus  String    @default("PENDING") // PENDING | PAID | FAILED | REFUNDED | PARTIALLY_REFUNDED
+  status         String    @default("PENDING") // PENDING | CONFIRMED | CANCELLED | COMPLETED | CHECKED_IN
+  extras         String    @default("[]") // JSON-array av tillegg [{name, price}]
+  partnerName    String?
+  weddingDate    DateTime?
+  note           String?
+  checkedInAt    DateTime?
+  cancelReason   String?
+  createdAt      DateTime  @default(now())
+
+  klippekortUse KlippekortUse[]
+}
+
+model WaitlistEntry {
+  id             String    @id @default(cuid())
+  courseId       String
+  course         Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  userId         String
+  user           User      @relation(fields: [userId], references: [id])
+  profileId      String?
+  profile        DeltakerProfile? @relation(fields: [profileId], references: [id])
+  role           String // FORER | FOLGER
+  position       Int
+  status         String    @default("ACTIVE") // ACTIVE | OFFERED | CONVERTED | EXPIRED | CANCELLED
+  offerExpiresAt DateTime?
+  createdAt      DateTime  @default(now())
+}
+
+// ---------------- Anmeldelser ----------------
+
+model Review {
+  id         String    @id @default(cuid())
+  schoolId   String
+  school     School    @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  courseId   String?
+  course     Course?   @relation(fields: [courseId], references: [id])
+  userId     String?
+  authorName String
+  rating     Int // 1–5
+  text       String
+  status     String    @default("APPROVED") // PENDING | APPROVED | REJECTED
+  reply      String?
+  repliedAt  DateTime?
+  createdAt  DateTime  @default(now())
+}
+
+// ---------------- Klippekort, gavekort, kuponger ----------------
+
+model Klippekort {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id])
+  schoolId    String? // null = gyldig hos alle (demo)
+  clips       Int       @default(10)
+  used        Int       @default(0)
+  price       Int
+  purchasedAt DateTime  @default(now())
+  expiresAt   DateTime?
+
+  uses KlippekortUse[]
+}
+
+model KlippekortUse {
+  id           String   @id @default(cuid())
+  klippekortId String
+  klippekort   Klippekort @relation(fields: [klippekortId], references: [id], onDelete: Cascade)
+  bookingId    String
+  booking      Booking  @relation(fields: [bookingId], references: [id])
+  usedAt       DateTime @default(now())
+}
+
+model GiftCard {
+  code       String   @id
+  amount     Int
+  balance    Int
+  buyerEmail String?
+  active     Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  expiresAt  DateTime?
+}
+
+model Coupon {
+  code       String  @id
+  percentOff Int     @default(0)
+  amountOff  Int     @default(0)
+  active     Boolean @default(true)
+  maxUses    Int     @default(1000)
+  uses       Int     @default(0)
+  description String
+}
+
+// ---------------- Favoritter, meldinger, varsellogg ----------------
+
+model Favorite {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  courseId  String
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, courseId])
+}
+
+model Message {
+  id       String    @id @default(cuid())
+  schoolId String
+  school   School    @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  userId   String?
+  fromRole String // DANSER | SKOLE
+  senderName String
+  subject  String
+  body     String
+  readAt   DateTime?
+  createdAt DateTime @default(now())
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String?
+  email     String?
+  phone     String?
+  channel   String   @default("EMAIL") // EMAIL | SMS
+  subject   String
+  body      String
+  createdAt DateTime @default(now())
+}
+
+// ---------------- Betalinger (mock Vipps/kort, logg) ----------------
+
+model Payment {
+  id          String   @id @default(cuid())
+  bookingCode String
+  method      String // VIPPS | KORT
+  amount      Int
+  status      String   @default("PAID") // PAID | FAILED | REFUNDED
+  reference   String
+  createdAt   DateTime @default(now())
+}

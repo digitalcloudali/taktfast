@@ -1,0 +1,232 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  /* --- Taktfast designsystem (TINE-inspirert navy/hvit med pastellfargeblokker) --- */
+  --page: #ffffff;
+  --surface: #f2f2f2;
+  --divider: #ccd2de;
+  --input-border: #b3b3b3;
+
+  --navy: #00205b;
+  --navy-deep: #000e28;
+  --navy-mid: #1c3f78;
+
+  --sky: #8bb8e8;
+  --sky-pale: #eef5fc;
+  --stripe: #e5e8f2;
+
+  --signal-red: #d6001c;
+  --raspberry: #b80040;
+  --accent-pink: #eb5986;
+
+  --tint-peach: #fff2e5; /* pardans */
+  --tint-pink: #feeff6; /* barnedans */
+  --tint-butter: #fdf6d8; /* bryllupsdans */
+  --tint-sand: #f3eee8; /* seniordans / danse vanlig */
+  --tint-lilac: #f1e6ef; /* ballett/jazz */
+  --tint-sky: #eef5fc; /* hiphop/street */
+  --tint-mint: #edf5d9; /* trening/zumba */
+  --tint-mint-deep: #daecd8;
+  --tint-aqua: #d9f3f5; /* linedance */
+
+  --text-heading: #00205b;
+  --text-body: #1a1a1a;
+  --text-muted: #6b6b6b;
+  --disabled-bg: #dfdfdf;
+  --disabled-text: #9f9f9f;
+  --focus: #216ba5;
+
+  /* --- shadcn mapping --- */
+  --background: #ffffff;
+  --foreground: #1a1a1a;
+  --card: #ffffff;
+  --card-foreground: #1a1a1a;
+  --popover: #ffffff;
+  --popover-foreground: #1a1a1a;
+  --primary: #00205b;
+  --primary-foreground: #ffffff;
+  --secondary: #eef5fc;
+  --secondary-foreground: #00205b;
+  --muted: #f2f2f2;
+  --muted-foreground: #6b6b6b;
+  --accent: #eef5fc;
+  --accent-foreground: #00205b;
+  --destructive: #d6001c;
+  --destructive-foreground: #ffffff;
+  --border: #ccd2de;
+  --input: #b3b3b3;
+  --ring: #216ba5;
+  --radius: 0.375rem; /* 6px kort */
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  /* Taktfast farger tilgjengelige som Tailwind-klasser */
+  --color-navy: var(--navy);
+  --color-navy-deep: var(--navy-deep);
+  --color-navy-mid: var(--navy-mid);
+  --color-sky: var(--sky);
+  --color-sky-pale: var(--sky-pale);
+  --color-stripe: var(--stripe);
+  --color-signal: var(--signal-red);
+  --color-raspberry: var(--raspberry);
+  --color-tpink: var(--accent-pink);
+  --color-tint-peach: var(--tint-peach);
+  --color-tint-pink: var(--tint-pink);
+  --color-tint-butter: var(--tint-butter);
+  --color-tint-sand: var(--tint-sand);
+  --color-tint-lilac: var(--tint-lilac);
+  --color-tint-sky: var(--tint-sky);
+  --color-tint-mint: var(--tint-mint);
+  --color-tint-mint-deep: var(--tint-mint-deep);
+  --color-tint-aqua: var(--tint-aqua);
+  --color-tf-muted: var(--text-muted);
+  --color-tf-heading: var(--text-heading);
+  --color-tf-body: var(--text-body);
+  --color-tf-divider: var(--divider);
+  --color-tf-surface: var(--surface);
+  --font-display: var(--font-nunito), ui-rounded, system-ui, sans-serif;
+  --font-body: var(--font-figtree), system-ui, sans-serif;
+}
+
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    background: var(--page);
+    color: var(--text-body);
+    font-family: var(--font-body), system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display), system-ui, sans-serif;
+    color: var(--text-heading);
+    line-height: 1.1;
+    font-weight: 800;
+  }
+  h1 { font-size: clamp(2rem, 4vw, 3rem); } /* hero 32–48px */
+  h2 { font-size: clamp(1.6rem, 2.6vw, 2.25rem); } /* 30–36px */
+  h3 { font-size: 1.375rem; } /* 22px */
+  a { color: var(--navy); }
+  :focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+  ::selection {
+    background: var(--sky);
+    color: var(--navy);
+  }
+}
+
+@layer utilities {
+  /* Navigasjon: 3px himmelblå understrek (TINE-mønster) */
+  .nav-underline {
+    position: relative;
+  }
+  .nav-underline::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -1px;
+    height: 3px;
+    background: var(--sky);
+    border-radius: 2px 2px 0 0;
+    transform: scaleX(0);
+    transition: transform 0.18s ease;
+  }
+  .nav-underline:hover::after,
+  .nav-underline[data-active="true"]::after {
+    transform: scaleX(1);
+  }
+
+  /* Pastellfargeblokker per dansefamilie */
+  .tint-peach { background: var(--tint-peach); }
+  .tint-pink { background: var(--tint-pink); }
+  .tint-butter { background: var(--tint-butter); }
+  .tint-sand { background: var(--tint-sand); }
+  .tint-lilac { background: var(--tint-lilac); }
+  .tint-sky { background: var(--tint-sky); }
+  .tint-mint { background: var(--tint-mint); }
+  .tint-aqua { background: var(--tint-aqua); }
+
+  /* Rutenettstriping (tabeller) */
+  .stripe-row:nth-child(even) { background: var(--stripe); }
+
+  /* Skjult scrollbar men scrollbar ved hover — brukes på lister med max-h-96 */
+  .nice-scroll {
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--divider) transparent;
+  }
+  .nice-scroll::-webkit-scrollbar { width: 8px; height: 8px; }
+  .nice-scroll::-webkit-scrollbar-thumb { background: var(--divider); border-radius: 8px; }
+  .nice-scroll::-webkit-scrollbar-track { background: transparent; }
+
+  /* Horisontal karusell med snap */
+  .snap-row {
+    display: flex;
+    gap: 1rem;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding-bottom: 0.5rem;
+    scrollbar-width: none;
+  }
+  .snap-row::-webkit-scrollbar { display: none; }
+  .snap-row > * { scroll-snap-align: start; flex: 0 0 auto; }
+
+  /* "Les mer ›" lenke */
+  .link-chevron {
+    color: var(--navy);
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+  .link-chevron:hover { text-decoration: underline; }
+
+  /* Helnavy seksjon */
+  .navy-block { background: var(--navy); color: #fff; }
+  .navy-block h2, .navy-block h3 { color: #fff; }
+
+  .text-balance { text-wrap: balance; }
+}
+
+/* Redusert bevegelse */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
