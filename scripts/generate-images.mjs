@@ -9,7 +9,7 @@ fs.mkdirSync(OUT, { recursive: true });
 const STYLE =
   'Photorealistic, bright Scandinavian dance studio, natural Nordic daylight through large windows, warm and inviting atmosphere, diverse dancers of different ages and body types, modest clothing, joyful and inclusive mood, high quality, detailed photography. No logos, no brands, no text, no watermarks.';
 
-const H = '1440x720';
+const H = '1344x768';
 const C = '1152x864'; // 4:3-ish cards
 const S = '1024x1024'; // square tiles
 

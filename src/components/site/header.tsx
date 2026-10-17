@@ -55,7 +55,7 @@ export function SiteHeader() {
     <header className="sticky top-0 z-50 bg-white shadow-[0_1px_0_0_var(--divider)]">
       {/* Tynn toppbjelke */}
       <div className="border-b border-[#CCD2DE] bg-white">
-        <div className="mx-auto flex h-9 max-w-7xl items-center justify-end gap-5 px-4 text-[13px]">
+        <div className="nice-scroll mx-auto flex h-9 max-w-7xl items-center justify-end gap-5 overflow-x-auto whitespace-nowrap px-4 text-[13px]">
           <Link href="/for-danseskoler" className="text-navy hover:underline">For danseskoler</Link>
           <Link href="/gavekort" className="text-navy hover:underline">Gavekort</Link>
           <Link href="/kundeservice" className="text-navy hover:underline">Kundeservice</Link>
