@@ -84,6 +84,7 @@ model School {
   reviews         Review[]
   privateRequests PrivateRequest[]
   messages        Message[]
+  bookings        Booking[]
 }
 
 model Studio {
@@ -295,6 +296,7 @@ model Booking {
   cancelReason   String?
   createdAt      DateTime  @default(now())
 
+  school        School @relation(fields: [schoolId], references: [id])
   klippekortUse KlippekortUse[]
 }
 

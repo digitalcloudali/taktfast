@@ -273,7 +273,7 @@ async function main() {
   await db.school.createMany({ data: schoolRows });
 
   // studier og instruktører
-  type StudioRec = { id: string; schoolId: string; name: string };
+  type StudioRec = { id: string; schoolId: string; name: string; description: string; floorType: string; dressingRooms: boolean; parking: boolean };
   const studios: StudioRec[] = [];
   type InstrRec = { id: string; schoolId: string; name: string; bio: string; styles: string; imageUrl: string; since: number };
   const instructors: InstrRec[] = [];
@@ -313,6 +313,7 @@ async function main() {
     capacity: number; unit: string; price: number; dropInPrice: number | null; studentPrice: number | null;
     seniorPrice: number | null; pricePer: string; weekday: number; startTime: string; startDate: Date;
     sessions: number; imageUrl: string; komAlene: boolean; seatsPlanned: number; // planlagt fyllgrad
+    description: string; learnWhat: string; clothing: string; durationMin: number;
   };
   const courses: CourseRec[] = [];
   const usedSlugs = new Set<string>();
@@ -398,7 +399,7 @@ async function main() {
         clothing: pick(["Komfortable klær og rene indendørssko.", "Treningsklær; dansesko eller sko med glatt såle anbefales.", "Bruk det du beveger deg godt i — vi hjelper med skovalg."]),
         capacity, unit, price, dropInPrice, studentPrice, seniorPrice,
         pricePer: format === "PRIVATTIME" ? "PAR" : unit === "PAR" && style !== "bryllupsdans" ? "PERSON" : unit === "PAR" ? "PAR" : "PERSON",
-        weekday, startTime, startDate, sessions, imageUrl,
+        weekday, startTime, startDate, sessions, imageUrl, durationMin: 75,
         komAlene: styleDef.komAlene && (isPartner ? chance(0.85) : true),
         seatsPlanned: fillTarget,
       });
@@ -454,8 +455,8 @@ async function main() {
   // ---------- bookinger ----------
   console.log("🎟️  Bookinger …");
   type BookingRec = {
-    id: string; code: string; userId: string; profileId: string; schoolId: string; courseId: string;
-    dateId: string | null; kind: string; role: string; seatLabel: string | null; amount: number;
+    id: string; code: string; userId: string; profileId: string; schoolId: string; courseId: string | null;
+    dateId: string | null; nightId?: string | null; kind: string; role: string; seatLabel: string | null; amount: number;
     paymentMethod: string; paymentStatus: string; status: string; extras: string; createdAt: Date;
     checkedInAt: Date | null; klippekortId?: string;
   };
@@ -500,7 +501,7 @@ async function main() {
           schoolId: c.schoolId, courseId: c.id, dateId: null, kind: "PRIVATTIME", role: "BEGGE",
           seatLabel: "Par", amount: c.price, paymentMethod: chance(0.5) ? "VIPPS" : "KORT",
           paymentStatus: "PAID", status: "CONFIRMED", extras: JSON.stringify([{ name: "Brudesang", price: 0 }]),
-          createdAt: dateAt(-ri(2, 40), 14), checkedInAt: null, weddingDate: undefined as never,
+          createdAt: dateAt(-ri(2, 40), 14), checkedInAt: null,
         });
       }
       continue;

@@ -54,8 +54,8 @@ export async function GET() {
   const kpis = {
     omsetningSiste6: allTime,
     provisjon: Math.round(allTime * COMMISSION_RATE),
-    bookinger: await db.booking.count(schoolId ? { where: { schoolId } } : {}),
-    kurs: await db.course.count(schoolId ? { where: { schoolId } } : {}),
+    bookinger: schoolId ? await db.booking.count({ where: { schoolId } }) : await db.booking.count(),
+    kurs: schoolId ? await db.course.count({ where: { schoolId } }) : await db.course.count(),
     venteliste: await db.waitlistEntry.count({ where: { ...(schoolId ? { course: { schoolId } } : {}), status: { in: ["ACTIVE", "OFFERED"] } } }),
     vurdering: schoolId ? (await db.school.findFirst({ where: { id: schoolId } }))?.ratingAvg ?? 0 : 4.5,
   };
